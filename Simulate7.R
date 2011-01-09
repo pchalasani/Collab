@@ -236,57 +236,109 @@ for (j in 2 : s)
   #First session
   
 #FOR SOME REASON, THIS IS ONLY WORKING FOR PATIENT 2  when the first three statements are after the WHILE
-# AND, WITH THEM AFTER FIRST FOR, IT NEVER HALTS AND RESETS PATIENTS [1,]  
-for(i in 2:p)
-{
-   while (insess[1] < m & waitlist[1] > 0)  #THIS MAY NEED TO BE A WHILE LOOP, FOR MULTIPLE PATIENTS
-   {
-      invited[i,1] <- 1
-      waitlist[1] <- waitlist[1] - 1
-      insess[1] <- insess[1] + 1
-      if (classlist[i] == "D")
-      {
-         if (runif(1) < dropnew) {patients[i, 1] <- 'A'} else
-         {
-           patients[i, 1] <- 'S'
-           missinrow[i, 1] <- 1
-         }
-      }
-      if (classlist[i] == "T")
-      {
-           if (runif(1) < titratenew) {patients[i, 1] <- 'A'} else 
-           {
-             patients[i, 1] <- 'S'
-             missinrow[i, 1] <- 1
-           }
-       }
-       if (classlist[i] == "C")
-       {
-           if (runif(1) < completenew) {patients[i, 1] <- 'A'} else 
-           {
-           patients[i, 1] <- 'S'
-           missinrow[i, 1] <- 1
-           }
-       }
-       if (classlist[i] == "N")
-       {
-           if (runif(1) < noisenew) {patients[i, 1] <- 'A'} else 
-           {
-           patients[i, 1] <- 'S'
-           missinrow[i, 1] <- 1
-           }
-       }
-       if (classlist[i] == "O")
-       {
-       if (runif(1) < othernew) {patients[i, 1] <- 'A'} else 
-           {
-           patients[i, 1] <- 'S'
-           missinrow[i, 1] <- 1
-           }
-       }
-   }
+# AND, WITH THEM AFTER FIRST FOR, IT NEVER HALTS AND RESETS PATIENTS [1,]
+rest.original <- function() {
+  for(i in 2:p)
+    {
+      while (insess[1] < m & waitlist[1] > 0)  #THIS MAY NEED TO BE A WHILE LOOP, FOR MULTIPLE PATIENTS
+        {
+          invited[i,1] <- 1
+          waitlist[1] <- waitlist[1] - 1
+          insess[1] <- insess[1] + 1
+          ## the rest of the code below does not touch the loop-relevant variables i, insess, waitlist,
+          ## so they can be commented out to make a minimal 'failing' example, see the rest1 fn below.
+          if (classlist[i] == "D")
+            {
+              if (runif(1) < dropnew) {patients[i, 1] <- 'A'} else
+              {
+                patients[i, 1] <- 'S'
+                missinrow[i, 1] <- 1
+              }
+            }
+          if (classlist[i] == "T")
+            {
+              if (runif(1) < titratenew) {patients[i, 1] <- 'A'} else 
+              {
+                patients[i, 1] <- 'S'
+                missinrow[i, 1] <- 1
+              }
+            }
+          if (classlist[i] == "C")
+            {
+              if (runif(1) < completenew) {patients[i, 1] <- 'A'} else 
+              {
+                patients[i, 1] <- 'S'
+                missinrow[i, 1] <- 1
+              }
+            }
+          if (classlist[i] == "N")
+            {
+              if (runif(1) < noisenew) {patients[i, 1] <- 'A'} else 
+              {
+                patients[i, 1] <- 'S'
+                missinrow[i, 1] <- 1
+              }
+            }
+          if (classlist[i] == "O")
+            {
+              if (runif(1) < othernew) {patients[i, 1] <- 'A'} else 
+              {
+                patients[i, 1] <- 'S'
+                missinrow[i, 1] <- 1
+              }
+            }
+        }
+    }
 }
-  
+
+
+
 #Later sessions
 
 #GET THIS FROM V6 AND THEN MODIFY, OR MODIFY ABOVE
+
+
+# This is the minimal failing version of the above 'rest.orig' fn:
+rest <- function() {
+  for(i in 2:p)
+    {
+      # we are not changing insess or waitlist here, so once the while condition fails for i=2,
+      # it will fail for all remaining i values
+      while (insess[1] < m & waitlist[1] > 0)  #THIS MAY NEED TO BE A WHILE LOOP, FOR MULTIPLE PATIENTS
+        {
+          invited[i,1] <- 1
+          waitlist[1] <- waitlist[1] - 1
+          insess[1] <- insess[1] + 1
+        }
+    }
+}
+
+
+
+## NOTES ON HOW TO DEBUG THIS in general
+
+## First install the 'debug' package, using this command:
+if (FALSE) {
+
+install.packages('debug')
+
+## Now after running all the initial lines of the above code in R, paste the definition of the 'rest' function into R.
+## Now set up the 'rest' function for debugging:
+mtrace( rest )
+
+## Now run the rest() function and you can step through it, and examine variables, etc.
+## It should pop up a separate window where it shows which line you are at.
+## You then set up a breakpoint at the 'while' statement using:
+bp(3,TRUE)
+## ( I am assuming the line number of the while is 3 in the debug-code-window )
+## Then you can just ask it to run until it hits the breakpoint by saying
+go()
+## Once at the breakpiont you can examine the values of insess[1], waitlist[1], etc,
+## and see what you need to change in your logic.
+
+## You can also simply single-step through the code by hitting enter each time.
+
+}
+
+
+  
